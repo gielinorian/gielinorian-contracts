@@ -1,2 +1,143 @@
 (print "Initializing module namespaces")
 (load "./namespaces/ns.repl")
+
+(begin-tx "Initializing key-sets")
+  (env-data
+    {
+      "k:admin": {
+          "keys": ["admin"],
+          "pred": "keys-all"
+      },
+      "k:user": {
+        "keys": ["user"],
+        "pred": "keys-all"
+      },
+      'ns: "free",
+      'upgrade: false
+    }
+  )
+(commit-tx)
+
+(begin-tx "Loading Gielinorian namespace")
+  (env-keys ["admin", "user"])
+
+  (define-namespace (read-msg 'ns ) (read-keyset "k:admin" ) (read-keyset "k:admin" ))
+  (define-keyset "free.gielinorian-admin" (read-keyset "k:admin" ))
+  (load "./gielinorian/world/gielinorian-world.pact")
+  (load "./gielinorian/item/gielinorian-item-policy.pact")
+(commit-tx)
+
+(begin-tx "Setup world")
+  (use free.gielinorian-item-policy)
+  (use free.gielinorian-world)
+
+  (expect "World to be created"
+    true
+    (free.gielinorian-world.create-world "1" "k:admin" (read-keyset "k:admin") free.gielinorian-item-policy)
+  )
+
+  (expect "World to be created in ledger"
+    {
+      'world-account: "k:admin",
+      'world-guard: (read-keyset "k:admin"),
+      'policy: free.gielinorian-item-policy
+    }
+    (free.gielinorian-world.get-world "1")
+  )
+
+  (expect "Item to be created"
+    true
+    (free.gielinorian-world.create-world-item "1" "t:WeGzeMp6N3BU7Vqitv4fg2MkWqVYLPU9ps4pndV22ps" -1.0)
+  )
+
+  (expect "Item to be created in ledger"
+    {
+      'world-id: "1",
+      'supply: 0.0,
+      'max-supply: -1.0
+    }
+    (free.gielinorian-world.get-item "t:WeGzeMp6N3BU7Vqitv4fg2MkWqVYLPU9ps4pndV22ps")
+  )
+(commit-tx)
+
+(begin-tx "Minting process")
+  (use kip.token-manifest)
+  (use marmalade.ledger)
+  (use free.gielinorian-world)
+  (use free.gielinorian-item-policy)
+
+  (env-sigs
+    [
+      { 
+        'key: 'admin,
+        'caps: [
+          (marmalade.ledger.MINT "t:WeGzeMp6N3BU7Vqitv4fg2MkWqVYLPU9ps4pndV22ps" "k:admin" 1.0)
+        ]
+      }
+    ]
+  )
+
+  (let*
+    (
+      (datum_1 (create-datum (uri "attribute-file-hash" "https://ipfs")
+        { 
+        "attributes": [
+          {
+            "property": "id",
+            "value": 1038
+          }
+          {
+            "property": "name",
+            "value": "Red Party Hat"
+          },
+          {
+            "property": "description",
+            "value": "A red party hat"
+          }
+        ]
+      }))
+      (manifest (create-manifest (uri "image-file-hash" "https://ipfs") [datum_1]))
+      (token-id (create-token-id manifest))
+    )
+
+    
+    (marmalade.ledger.create-token
+      token-id
+      0
+      manifest
+      free.gielinorian-item-policy
+    )  
+
+    (expect "Mint a red party hat on world 1"
+      true
+      (marmalade.ledger.mint
+        token-id
+        "k:admin"
+        (read-keyset "k:admin")
+        1.0
+      )
+    )
+  )
+(commit-tx)
+
+
+(begin-tx "Non-admin operations")
+  (env-data 
+    {
+      "k:user": {
+        "keys": ["user"],
+        "pred": "keys-all"
+      }
+    }
+  )
+  
+  (env-keys ["user"])
+
+  (expect-failure "Creating world with non-admin key"
+    (free.gielinorian-world.create-world "2" "k:user" (read-keyset "k:user") free.gielinorian-item-policy)
+  )
+
+  (expect-failure "Creating world item with non-world-guard key"
+    (free.gielinorian-world.create-world-item "1" "t:WeGzeMp6N3BU7Vqitv4fg2MkWqVYLPU9ps4pndV22ps" -1.0)
+  )
+(commit-tx)
