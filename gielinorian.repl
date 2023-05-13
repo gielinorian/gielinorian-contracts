@@ -5,8 +5,16 @@
   (env-data
     {
       "k:admin": {
-          "keys": ["admin"],
-          "pred": "keys-all"
+        "keys": ["admin"],
+        "pred": "keys-all"
+      },
+      "k:world-1": {
+        "keys": ["world-1"],
+        "pred": "keys-all"
+      },
+      "k:world-2": {
+        "keys": ["world-2"],
+        "pred": "keys-all"
       },
       "k:user": {
         "keys": ["user"],
@@ -19,125 +27,100 @@
 (commit-tx)
 
 (begin-tx "Loading Gielinorian namespace")
-  (env-keys ["admin", "user"])
+  (env-keys ["admin", "user", "world-1", "world-2"])
 
   (define-namespace (read-msg 'ns ) (read-keyset "k:admin" ) (read-keyset "k:admin" ))
   (define-keyset "free.gielinorian-admin" (read-keyset "k:admin" ))
   (load "./gielinorian/world/gielinorian-world.pact")
-  (load "./gielinorian/item/gielinorian-item-policy.pact")
+  (load "./gielinorian/item/gielinorian-item-policy-v2.pact")
 (commit-tx)
 
-(begin-tx "Setup world")
-  (use free.gielinorian-item-policy)
-  (use free.gielinorian-world)
+(begin-tx "Setup world collections")
+  (use marmalade-v2.ledger)
+  (use marmalade-v2.policy-manager)
+  (use marmalade-v2.collection-policy-v1)
 
-  (expect "World to be created"
+  (expect "Initializing world 1"
     true
-    (free.gielinorian-world.create-world "1" "k:admin" (read-keyset "k:admin") free.gielinorian-item-policy)
+    (create-collection "World-1" 0 (read-keyset "k:world-1"))
   )
 
-  (expect "World to be created in ledger"
-    {
-      'world-account: "k:admin",
-      'world-guard: (read-keyset "k:admin"),
-      'policy: free.gielinorian-item-policy
-    }
-    (free.gielinorian-world.get-world "1")
-  )
-
-  (expect "Item to be created"
+  (expect "Initializing world 2"
     true
-    (free.gielinorian-world.create-world-item "1" "t:WeGzeMp6N3BU7Vqitv4fg2MkWqVYLPU9ps4pndV22ps" -1.0)
+    (create-collection "World-2" 0 (read-keyset "k:world-2"))
   )
 
-  (expect "Item to be created in ledger"
-    {
-      'world-id: "1",
-      'supply: 0.0,
-      'max-supply: -1.0
-    }
-    (free.gielinorian-world.get-item "t:WeGzeMp6N3BU7Vqitv4fg2MkWqVYLPU9ps4pndV22ps")
+  (expect "Generation of world-1 collection"
+    "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU"
+    (create-collection-id "World-1")
   )
+
+  (expect "Generation of world-2 collection"
+    "collection:x3ZOOotVxtvK9XpKLD70A0KC4RONH7YEY-0Szki3188"
+    (create-collection-id "world-2")
+  )
+
+  ;(print (get-collections))
 (commit-tx)
 
-(begin-tx "Minting process")
-  (use kip.token-manifest)
-  (use marmalade.ledger)
-  (use free.gielinorian-world)
-  (use free.gielinorian-item-policy)
+(begin-tx "Create world Item")
+  (use marmalade-v2.ledger)
+  (use marmalade-v2.policy-manager)
+  (use marmalade-v2.collection-policy-v1)
+  ;(use free.gielinorian-item-policy-v2)
 
-  (env-sigs
-    [
-      { 
-        'key: 'admin,
-        'caps: [
-          (marmalade.ledger.MINT "t:WeGzeMp6N3BU7Vqitv4fg2MkWqVYLPU9ps4pndV22ps" "k:admin" 1.0)
-        ]
-      }
-    ]
-  )
-
-  (let*
-    (
-      (datum_1 (create-datum (uri "attribute-file-hash" "https://ipfs")
-        { 
-        "attributes": [
-          {
-            "property": "id",
-            "value": 1038
-          }
-          {
-            "property": "name",
-            "value": "Red Party Hat"
-          },
-          {
-            "property": "description",
-            "value": "A red party hat"
-          }
-        ]
-      }))
-      (manifest (create-manifest (uri "image-file-hash" "https://ipfs") [datum_1]))
-      (token-id (create-token-id manifest))
-    )
-
-    
-    (marmalade.ledger.create-token
-      token-id
-      0
-      manifest
-      free.gielinorian-item-policy
-    )  
-
-    (expect "Mint a red party hat on world 1"
-      true
-      (marmalade.ledger.mint
-        token-id
-        "k:admin"
-        (read-keyset "k:admin")
-        1.0
-      )
-    )
-  )
-(commit-tx)
-
-
-(begin-tx "Non-admin operations")
-  (env-data 
+  (env-data
     {
-      "k:user": {
-        "keys": ["user"],
+      "cp-mint-guard": {
+        "keys": ["admin"], 
         "pred": "keys-all"
-      }
+      },
+      "collection-id": "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU",
+      'ns: "free",
+      'upgrade: false
     }
   )
-  
-  (env-keys ["user"])
 
-  (expect-failure "Creating world with non-admin key"
-    (free.gielinorian-world.create-world "2" "k:user" (read-keyset "k:user") free.gielinorian-item-policy)
+  (use kip.token-policy-v2 [token-policies concrete-policy])
+
+  (module world-item-constants GOVERNANCE
+    (defcap GOVERNANCE () true)
+    
+    (defconst WORLD_ITEM_COLLECTION:object{concrete-policy}
+      { 
+        'quote-policy: true,
+        'non-fungible-policy: false,
+        'royalty-policy: false,
+        'collection-policy: true
+      }
+    )
+
+    (defconst WORLD_ITEM_COLLECTION_POLICIES:object{token-policies}
+      { 
+        'concrete-policies: WORLD_ITEM_COLLECTION,
+        'immutable-policies: [free.gielinorian-item-policy-v2],
+        'adjustable-policies: []
+      }
+    )
   )
 
-  (expect-failure "Creating world item with non-world-guard key"
-    (free.gielinorian-world.create-world-item "1" "t:WeGzeMp6N3BU7Vqitv4fg2MkWqVYLPU9ps4pndV22ps" -1.0)
+  (let
+    (
+      (red-party-hat-id:string (create-token-id { 'uri: "red-party-hat-uri", 'precision: 0, 'policies: world-item-constants.WORLD_ITEM_COLLECTION_POLICIES }))
+    )
+    (expect "Create a red party hat world token"
+      true
+      (create-token red-party-hat-id 0 "red-party-hat-uri" world-item-constants.WORLD_ITEM_COLLECTION_POLICIES)
+    )
+  )
+
+  (let
+    (
+      (blue-party-hat-id:string (create-token-id { 'uri: "blue-party-hat-uri", 'precision: 0, 'policies: world-item-constants.WORLD_ITEM_COLLECTION_POLICIES }))
+    )
+    (expect "Create a blue party hat world token"
+      true
+      (create-token blue-party-hat-id 0 "blue-party-hat-uri" world-item-constants.WORLD_ITEM_COLLECTION_POLICIES)
+    ) 
   )
 (commit-tx)
