@@ -143,3 +143,40 @@
     (marmalade-v2.collection-policy-v1.get-collection "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU")
   )
 (commit-tx)
+
+(begin-tx "Create world-2 Items for collection")
+  (use marmalade-v2.ledger)
+  (use marmalade-v2.policy-manager)
+  (use marmalade-v2.collection-policy-v1)
+
+  (env-data
+    {
+      "cp-mint-guard": {
+        "keys": ["world-2"], 
+        "pred": "keys-all"
+      },
+      "collection-id": "collection:SGK_4OsQ23jP4hd57E-fqryisYzL618wh4ECgdxnM9Y",
+      'ns: "free",
+      'upgrade: false
+    }
+  )
+
+  (env-sigs 
+    [
+      {
+        'key: 'world-2,
+        'caps: []
+      }
+    ]
+  )
+
+  (let
+    (
+      (purple-party-hat-id:string (create-token-id { 'uri: "purple-party-hat-uri", 'precision: 0, 'policies: world-item-constants.WORLD_ITEM_COLLECTION_POLICIES }))
+    )
+    (expect-failure "Cannot create a purple party hat without operator guard"
+      "keyset failure"
+      (create-token purple-party-hat-id 0 "purple-party-hat-uri" world-item-constants.WORLD_ITEM_COLLECTION_POLICIES)
+    )
+  )
+(rollback-tx)
