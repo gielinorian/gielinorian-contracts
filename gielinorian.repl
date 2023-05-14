@@ -59,26 +59,34 @@
     "collection:SGK_4OsQ23jP4hd57E-fqryisYzL618wh4ECgdxnM9Y"
     (create-collection-id "World-2")
   )
-
-  ;(print (get-collections))
 (commit-tx)
 
-(begin-tx "Create world Item")
+(begin-tx "Create world-1 Items for collection")
   (use marmalade-v2.ledger)
   (use marmalade-v2.policy-manager)
   (use marmalade-v2.collection-policy-v1)
-  ;(use free.gielinorian-item-policy-v2)
 
   (env-data
     {
       "cp-mint-guard": {
-        "keys": ["admin"], 
+        "keys": ["world-1"], 
         "pred": "keys-all"
       },
       "collection-id": "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU",
       'ns: "free",
       'upgrade: false
     }
+  )
+
+  (env-sigs 
+    [
+      {
+        'key: 'world-1,
+        'caps: [
+          (marmalade-v2.collection-policy-v1.OPERATOR (read-msg 'collection-id ))
+        ]
+      }
+    ]
   )
 
   (use kip.token-policy-v2 [token-policies concrete-policy])
