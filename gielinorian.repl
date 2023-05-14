@@ -27,7 +27,7 @@
 (commit-tx)
 
 (begin-tx "Loading Gielinorian namespace")
-  (env-keys ["admin", "user", "world-1", "world-2"])
+  (env-keys ["admin"])
 
   (define-namespace (read-msg 'ns ) (read-keyset "k:admin" ) (read-keyset "k:admin" ))
   (define-keyset "free.gielinorian-admin" (read-keyset "k:admin" ))
