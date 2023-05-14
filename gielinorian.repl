@@ -56,8 +56,8 @@
   )
 
   (expect "Generation of world-2 collection"
-    "collection:x3ZOOotVxtvK9XpKLD70A0KC4RONH7YEY-0Szki3188"
-    (create-collection-id "world-2")
+    "collection:SGK_4OsQ23jP4hd57E-fqryisYzL618wh4ECgdxnM9Y"
+    (create-collection-id "World-2")
   )
 
   ;(print (get-collections))
