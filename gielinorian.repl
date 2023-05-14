@@ -180,3 +180,43 @@
     )
   )
 (rollback-tx)
+
+(begin-tx "Minting items on world-1")
+  (use marmalade-v2.ledger)
+  (use marmalade-v2.policy-manager)
+
+  (env-data
+    {
+      "cp-mint-guard": {
+        "keys": ["world-1"], 
+        "pred": "keys-all"
+      },
+      "collection-id": "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU"
+    }
+  )
+
+  (env-sigs 
+    [
+      {
+        'key: 'world-1,
+        'caps: [
+          (marmalade-v2.ledger.MINT "t:nfrR8vNaXkrBviIwi2lt48EljBxEIOR3Dh-o-YuBa00" "k:world-1" 1.0)
+          (marmalade-v2.collection-policy-v1.MINT "t:nfrR8vNaXkrBviIwi2lt48EljBxEIOR3Dh-o-YuBa00")
+          
+          (marmalade-v2.ledger.MINT "t:w68BqumxyY8JoSuLQIkfY-Tk_0unwdgLddQSDOCaMnA" "k:world-1" 5.0)
+          (marmalade-v2.collection-policy-v1.MINT "t:w68BqumxyY8JoSuLQIkfY-Tk_0unwdgLddQSDOCaMnA")
+        ]
+      }
+    ]
+  )
+
+  (expect "Minting a single red party hat"
+    true
+    (marmalade-v2.ledger.mint "t:nfrR8vNaXkrBviIwi2lt48EljBxEIOR3Dh-o-YuBa00" "k:world-1" (read-keyset "cp-mint-guard") 1.0)
+  )
+
+  (expect "Minting an amount of 5 blue party hats"
+    true
+    (marmalade-v2.ledger.mint "t:w68BqumxyY8JoSuLQIkfY-Tk_0unwdgLddQSDOCaMnA" "k:world-1" (read-keyset "cp-mint-guard") 5.0)
+  )
+(commit-tx)
