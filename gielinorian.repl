@@ -131,4 +131,15 @@
       (create-token blue-party-hat-id 0 "blue-party-hat-uri" world-item-constants.WORLD_ITEM_COLLECTION_POLICIES)
     ) 
   )
+
+  (expect "Validate world-1 collection"
+    {
+      "id": "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU",
+      "max-size": 0,
+      "name": "World-1",
+      "operator-guard": (read-msg 'cp-mint-guard),
+      "size": 2
+    }
+    (marmalade-v2.collection-policy-v1.get-collection "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU")
+  )
 (commit-tx)
