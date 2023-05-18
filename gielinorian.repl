@@ -1,36 +1,26 @@
 (print "Initializing module namespaces")
 (load "./namespaces/ns.repl")
 
-(begin-tx "Initializing key-sets")
+(begin-tx "Loading Gielinorian namespace")
   (env-data
     {
-      "k:admin": {
-        "keys": ["admin"],
-        "pred": "keys-all"
-      },
-      "k:world-1": {
-        "keys": ["world-1"],
-        "pred": "keys-all"
-      },
-      "k:world-2": {
-        "keys": ["world-2"],
-        "pred": "keys-all"
-      },
-      "k:user": {
-        "keys": ["user"],
-        "pred": "keys-all"
-      },
+      'gielinorian-admin: ["gielinorian-admin"],
       'ns: "free",
       'upgrade: false
     }
   )
-(commit-tx)
 
-(begin-tx "Loading Gielinorian namespace")
-  (env-keys ["admin"])
+  (env-sigs 
+    [
+      { 
+        'key: 'gielinorian-admin,
+        'caps: []
+      }
+    ]
+  )
+  (define-keyset "free.gielinorian-admin" (read-keyset "gielinorian-admin" ))
+  (define-namespace (read-msg 'ns ) (keyset-ref-guard "free.gielinorian-admin" ) (keyset-ref-guard "free.gielinorian-admin" ))
 
-  (define-namespace (read-msg 'ns ) (read-keyset "k:admin" ) (read-keyset "k:admin" ))
-  (define-keyset "free.gielinorian-admin" (read-keyset "k:admin" ))
   (load "./gielinorian/world/gielinorian-world.pact")
   (load "./gielinorian/item/gielinorian-item-policy-v2.pact")
 (commit-tx)
@@ -40,14 +30,29 @@
   (use marmalade-v2.policy-manager)
   (use marmalade-v2.collection-policy-v1)
 
+  (env-data
+    {
+      'world-1: {
+        'keys: ["world-1"], 
+        'pred: "keys-all"
+      },
+      'world-2: {
+        'keys: ["world-2"], 
+        'pred: "keys-all"
+      },
+      'ns: "free",
+      'upgrade: false
+    }
+  )
+
   (expect "Initializing world 1"
     true
-    (create-collection "World-1" 0 (read-keyset "k:world-1"))
+    (create-collection "World-1" 0 (read-keyset "world-1"))
   )
 
   (expect "Initializing world 2"
     true
-    (create-collection "World-2" 0 (read-keyset "k:world-2"))
+    (create-collection "World-2" 0 (read-keyset "world-2"))
   )
 
   (expect "Generation of world-1 collection"
@@ -61,34 +66,7 @@
   )
 (commit-tx)
 
-(begin-tx "Create world-1 Items for collection")
-  (use marmalade-v2.ledger)
-  (use marmalade-v2.policy-manager)
-  (use marmalade-v2.collection-policy-v1)
-
-  (env-data
-    {
-      "cp-mint-guard": {
-        "keys": ["world-1"], 
-        "pred": "keys-all"
-      },
-      "collection-id": "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU",
-      'ns: "free",
-      'upgrade: false
-    }
-  )
-
-  (env-sigs 
-    [
-      {
-        'key: 'world-1,
-        'caps: [
-          (marmalade-v2.collection-policy-v1.OPERATOR (read-msg 'collection-id ))
-        ]
-      }
-    ]
-  )
-
+(begin-tx "Setup world collection policies")
   (use kip.token-policy-v2 [token-policies concrete-policy])
 
   (module world-item-constants GOVERNANCE
@@ -110,6 +88,67 @@
         'adjustable-policies: []
       }
     )
+  )
+(commit-tx)
+
+(begin-tx "Create world-1 Items for collection")
+  (use marmalade-v2.ledger)
+  (use marmalade-v2.policy-manager)
+  (use marmalade-v2.collection-policy-v1)
+
+  (env-data 
+    {
+      "collection-id": "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU",
+      "cp-mint-guard": {
+        "keys": ["world-1"],
+        "pred": "keys-all"
+      }
+    }
+  )
+
+  (let
+    (
+      (purple-party-hat-id:string (create-token-id { 'uri: "purple-party-hat-uri", 'precision: 0, 'policies: world-item-constants.WORLD_ITEM_COLLECTION_POLICIES }))
+    )
+    (expect-failure "Cannot create a purple party hat without operator guard"
+      "Keyset failure (keys-all): [world-1]"
+      (create-token purple-party-hat-id 0 "purple-party-hat-uri" world-item-constants.WORLD_ITEM_COLLECTION_POLICIES)
+    )
+  )
+(rollback-tx)
+
+
+(begin-tx "Create world-1 Items for collection")
+  (use marmalade-v2.ledger)
+  (use marmalade-v2.policy-manager)
+  (use marmalade-v2.collection-policy-v1)
+
+  (env-data
+    {
+      'world-1: {
+        'keys: ["world-1"], 
+        'pred: "keys-all"
+      },
+      "cp-mint-guard": {
+        "keys": ["world-1"], 
+        "pred": "keys-all"
+      },
+      "collection-id": "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU",
+      'ns: "free",
+      'upgrade: false
+    }
+  )
+
+
+  (env-sigs 
+    [
+      {
+        'key: 'world-1,
+        'caps: [
+          (marmalade-v2.collection-policy-v1.OPERATOR (read-msg 'collection-id))
+        ]
+      }
+    ]
   )
 
   (let
@@ -144,49 +183,17 @@
   )
 (commit-tx)
 
-(begin-tx "Create world-2 Items for collection")
+(begin-tx "Minting items on world-1")
   (use marmalade-v2.ledger)
   (use marmalade-v2.policy-manager)
   (use marmalade-v2.collection-policy-v1)
 
   (env-data
     {
-      "cp-mint-guard": {
-        "keys": ["world-2"], 
-        "pred": "keys-all"
+      'world-1: {
+        'keys: ["world-1"], 
+        'pred: "keys-all"
       },
-      "collection-id": "collection:SGK_4OsQ23jP4hd57E-fqryisYzL618wh4ECgdxnM9Y",
-      'ns: "free",
-      'upgrade: false
-    }
-  )
-
-  (env-sigs 
-    [
-      {
-        'key: 'world-2,
-        'caps: []
-      }
-    ]
-  )
-
-  (let
-    (
-      (purple-party-hat-id:string (create-token-id { 'uri: "purple-party-hat-uri", 'precision: 0, 'policies: world-item-constants.WORLD_ITEM_COLLECTION_POLICIES }))
-    )
-    (expect-failure "Cannot create a purple party hat without operator guard"
-      "keyset failure"
-      (create-token purple-party-hat-id 0 "purple-party-hat-uri" world-item-constants.WORLD_ITEM_COLLECTION_POLICIES)
-    )
-  )
-(rollback-tx)
-
-(begin-tx "Minting items on world-1")
-  (use marmalade-v2.ledger)
-  (use marmalade-v2.policy-manager)
-
-  (env-data
-    {
       "cp-mint-guard": {
         "keys": ["world-1"], 
         "pred": "keys-all"
@@ -200,11 +207,11 @@
       {
         'key: 'world-1,
         'caps: [
-          (marmalade-v2.ledger.MINT "t:nfrR8vNaXkrBviIwi2lt48EljBxEIOR3Dh-o-YuBa00" "k:world-1" 1.0)
-          (marmalade-v2.collection-policy-v1.MINT "t:nfrR8vNaXkrBviIwi2lt48EljBxEIOR3Dh-o-YuBa00")
+          (marmalade-v2.ledger.MINT "t:AmkkzNd-EEJeh54X76BPfLh0Ld2ClvPqi7pNaQwxSLU" "k:world-1" 1.0)
+          (marmalade-v2.collection-policy-v1.MINT "t:AmkkzNd-EEJeh54X76BPfLh0Ld2ClvPqi7pNaQwxSLU")
           
-          (marmalade-v2.ledger.MINT "t:w68BqumxyY8JoSuLQIkfY-Tk_0unwdgLddQSDOCaMnA" "k:world-1" 5.0)
-          (marmalade-v2.collection-policy-v1.MINT "t:w68BqumxyY8JoSuLQIkfY-Tk_0unwdgLddQSDOCaMnA")
+          (marmalade-v2.ledger.MINT "t:IMyc-FLHyZMBfFegYkR5XI_rX2FPbafbeNYBHDUi1pQ" "k:world-1" 5.0)
+          (marmalade-v2.collection-policy-v1.MINT "t:IMyc-FLHyZMBfFegYkR5XI_rX2FPbafbeNYBHDUi1pQ")
         ]
       }
     ]
@@ -212,11 +219,13 @@
 
   (expect "Minting a single red party hat"
     true
-    (marmalade-v2.ledger.mint "t:nfrR8vNaXkrBviIwi2lt48EljBxEIOR3Dh-o-YuBa00" "k:world-1" (read-keyset "cp-mint-guard") 1.0)
+    (marmalade-v2.ledger.mint "t:AmkkzNd-EEJeh54X76BPfLh0Ld2ClvPqi7pNaQwxSLU" "k:world-1" (read-keyset "cp-mint-guard") 1.0)
   )
 
   (expect "Minting an amount of 5 blue party hats"
     true
-    (marmalade-v2.ledger.mint "t:w68BqumxyY8JoSuLQIkfY-Tk_0unwdgLddQSDOCaMnA" "k:world-1" (read-keyset "cp-mint-guard") 5.0)
+    (marmalade-v2.ledger.mint "t:IMyc-FLHyZMBfFegYkR5XI_rX2FPbafbeNYBHDUi1pQ" "k:world-1" (read-keyset "cp-mint-guard") 5.0)
   )
+
+  (get-tokens)
 (commit-tx)
