@@ -1,5 +1,4 @@
 (begin-tx "Kips")
-  ;(env-exec-config ["DisablePact44"])
   (env-data
     { 
       'ns-admin-keyset: [],
@@ -11,9 +10,6 @@
 
   (define-namespace 'kip (sig-keyset) (sig-keyset))
   (load "./account-protocols-v1.pact")
-  (load "./token-manifest.pact")
-  (load "./token-policy-v1.pact")
   (load "./token-policy-v2.pact")
-  (load "./poly-fungible-v2.pact")
   (load "./poly-fungible-v3.pact")
 (commit-tx)

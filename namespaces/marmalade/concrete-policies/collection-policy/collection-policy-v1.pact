@@ -53,7 +53,7 @@
   (defconst CP_MINT_GUARD "cp-mint-guard")
 
   (defun enforce-ledger:bool ()
-    (enforce-guard (marmalade-v2.ledger.ledger-guard))
+    (enforce-guard (marmalade.ledger.ledger-guard))
     true
   )
 
@@ -190,6 +190,9 @@
     (read tokens token-id)
   )
 
+  (defun get-tokens:[object{token}] ()
+    (keys tokens)
+  )
 )
 
 (if (read-msg 'upgrade )

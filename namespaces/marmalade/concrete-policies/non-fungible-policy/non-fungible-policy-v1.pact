@@ -28,7 +28,7 @@
   )
 
   (defun enforce-ledger:bool ()
-     (enforce-guard (marmalade-v2.ledger.ledger-guard))
+     (enforce-guard (marmalade.ledger.ledger-guard))
   )
 
   (defun enforce-init:bool
