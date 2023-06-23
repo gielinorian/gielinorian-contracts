@@ -1,8 +1,5 @@
 (namespace (read-msg 'ns ))
 (module gielinorian-world GOVERNANCE
-
-  (use kip.token-manifest [manifest])
-
   ;;
   ;; Schemas
   ;;
@@ -10,7 +7,7 @@
   (defschema world-schema
     world-account:string
     world-guard:guard
-    policy:module{kip.token-policy-v1}
+    policy:module{kip.token-policy-v2}
     ; currency:module{kip.fungible-v2} ; @todo should be the current world currency
   )
 
@@ -45,7 +42,7 @@
   ;; Events
   ;;
 
-  (defcap WORLD_CREATED:bool (world-account:string policy:module{kip.token-policy-v1}) ; currency:module{kip.fungible-v2}
+  (defcap WORLD_CREATED:bool (world-account:string policy:module{kip.token-policy-v2}) ; currency:module{kip.fungible-v2}
     @event
     true
   )
@@ -64,7 +61,7 @@
   ;; Functions
   ;;
 
-  (defun create-world (world-id:string world-account:string world-guard:guard policy:module{kip.token-policy-v1})
+  (defun create-world (world-id:string world-account:string world-guard:guard policy:module{kip.token-policy-v2})
     (with-capability (GOVERNANCE)
       (insert worlds world-id
         {

@@ -1,6 +1,7 @@
 ;;load policy manager, ledger
+(load "../../policy-manager/policy-manager.repl")
+
 (begin-tx)
-  (load "../../policy-manager/policy-manager.repl")
   (use kip.token-policy-v2 [token-policies concrete-policy QUOTE_POLICY NON_FUNGIBLE_POLICY ROYALTY_POLICY COLLECTION_POLICY])
 
   (module util GOV
@@ -11,6 +12,7 @@
        ,'non-fungible-policy: true
        ,'royalty-policy: false
        ,'collection-policy:false
+       ,'guard-policy: true
       }
     )
     (defconst DEFAULT_NON_FUNGIBLE_POLICIES:object{token-policies}
@@ -24,11 +26,10 @@
 (begin-tx)
   (use marmalade.ledger)
   (use marmalade.policy-manager)
-  (test-capability (coin.COINBASE))
   (env-data {
     "creator-guard": {"keys": ["creator"], "pred": "keys-all"}
   })
-  (coin.coinbase "creator-account" (read-keyset "creator-guard") 2.0)
+  (marmalade.abc.create-account "creator-account" (read-keyset 'creator-guard))
 (commit-tx)
 
 (begin-tx)
@@ -55,8 +56,7 @@
   (use marmalade.ledger)
   (env-sigs [
     { 'key: 'account
-     ,'caps: [(marmalade.ledger.MINT "t:qDAvy0zdAwC7cYdMKgFKufZjDiu16qms8kOu2TMy9Rg" "account" 5.0)
-             (marmalade.non-fungible-policy-v1.MINT "t:qDAvy0zdAwC7cYdMKgFKufZjDiu16qms8kOu2TMy9Rg")
+     ,'caps: [(marmalade.ledger.MINT "t:ql_vIepldcYgTSOzuW0VtvdQXDP7_EWP4g-jKL9mxUM" "account" 5.0)
     ]
     }])
 
@@ -69,8 +69,7 @@
   (use marmalade.ledger)
   (env-sigs [
     { 'key: 'account
-    ,'caps: [(marmalade.ledger.MINT "t:qDAvy0zdAwC7cYdMKgFKufZjDiu16qms8kOu2TMy9Rg" "account" 0.5)
-             (marmalade.non-fungible-policy-v1.MINT "t:qDAvy0zdAwC7cYdMKgFKufZjDiu16qms8kOu2TMy9Rg")]
+    ,'caps: [(marmalade.ledger.MINT "t:ql_vIepldcYgTSOzuW0VtvdQXDP7_EWP4g-jKL9mxUM" "account" 0.5)]
     }])
 
   (expect-failure "minting with amout of 0.5 fails"
@@ -82,8 +81,7 @@
   (use marmalade.ledger)
   (env-sigs [
     { 'key: 'account
-    ,'caps: [(marmalade.ledger.MINT "t:qDAvy0zdAwC7cYdMKgFKufZjDiu16qms8kOu2TMy9Rg" "account" 1.0)
-             (marmalade.non-fungible-policy-v1.MINT "t:qDAvy0zdAwC7cYdMKgFKufZjDiu16qms8kOu2TMy9Rg")]
+    ,'caps: [(marmalade.ledger.MINT "t:ql_vIepldcYgTSOzuW0VtvdQXDP7_EWP4g-jKL9mxUM" "account" 1.0)]
     }])
 
   (expect "minting succeeds"
@@ -95,7 +93,7 @@
   (use marmalade.ledger)
     (env-sigs [
       { 'key: 'account
-      ,'caps: [(marmalade.ledger.BURN "t:qDAvy0zdAwC7cYdMKgFKufZjDiu16qms8kOu2TMy9Rg" "account" 1.0)]
+      ,'caps: [(marmalade.ledger.BURN "t:ql_vIepldcYgTSOzuW0VtvdQXDP7_EWP4g-jKL9mxUM" "account" 1.0)]
       }])
 
     (expect-failure "Burning is not allowed"

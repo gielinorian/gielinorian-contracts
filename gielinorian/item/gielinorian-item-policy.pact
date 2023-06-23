@@ -1,8 +1,8 @@
 (namespace (read-msg 'ns ))
 (module gielinorian-item-policy GOVERNANCE
 
-  (implements kip.token-policy-v1)
-  (use kip.token-policy-v1 [token-info])
+  (implements kip.token-policy-v2)
+  (use kip.token-policy-v2 [token-info])
   (use kip.token-manifest [manifest])
   (use free.gielinorian-world [create-world-item get-item update-item-supply])
 

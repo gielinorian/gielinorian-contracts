@@ -18,17 +18,19 @@
       }
     ]
   )
+  (define-namespace (read-msg 'ns ) (read-keyset "gielinorian-admin" ) (read-keyset "gielinorian-admin" ))
+  (namespace (read-msg "ns"))
+
   (define-keyset "free.gielinorian-admin" (read-keyset "gielinorian-admin" ))
-  (define-namespace (read-msg 'ns ) (keyset-ref-guard "free.gielinorian-admin" ) (keyset-ref-guard "free.gielinorian-admin" ))
 
   (load "./gielinorian/world/gielinorian-world.pact")
   (load "./gielinorian/item/gielinorian-item-policy-v2.pact")
 (commit-tx)
 
 (begin-tx "Setup world collections")
-  (use marmalade-v2.ledger)
-  (use marmalade-v2.policy-manager)
-  (use marmalade-v2.collection-policy-v1)
+  (use marmalade.ledger)
+  (use marmalade.policy-manager)
+  (use marmalade.collection-policy-v1)
 
   (env-data
     {
@@ -77,7 +79,8 @@
         'quote-policy: true,
         'non-fungible-policy: false,
         'royalty-policy: false,
-        'collection-policy: true
+        'collection-policy: true,
+        'guard-policy: false
       }
     )
 
@@ -92,9 +95,9 @@
 (commit-tx)
 
 (begin-tx "Create world-1 Items for collection")
-  (use marmalade-v2.ledger)
-  (use marmalade-v2.policy-manager)
-  (use marmalade-v2.collection-policy-v1)
+  (use marmalade.ledger)
+  (use marmalade.policy-manager)
+  (use marmalade.collection-policy-v1)
 
   (env-data 
     {
@@ -119,9 +122,9 @@
 
 
 (begin-tx "Create world-1 Items for collection")
-  (use marmalade-v2.ledger)
-  (use marmalade-v2.policy-manager)
-  (use marmalade-v2.collection-policy-v1)
+  (use marmalade.ledger)
+  (use marmalade.policy-manager)
+  (use marmalade.collection-policy-v1)
 
   (env-data
     {
@@ -145,7 +148,7 @@
       {
         'key: 'world-1,
         'caps: [
-          (marmalade-v2.collection-policy-v1.OPERATOR (read-msg 'collection-id))
+          (marmalade.collection-policy-v1.OPERATOR (read-msg 'collection-id))
         ]
       }
     ]
@@ -179,14 +182,14 @@
       "operator-guard": (read-msg 'cp-mint-guard),
       "size": 2
     }
-    (marmalade-v2.collection-policy-v1.get-collection "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU")
+    (marmalade.collection-policy-v1.get-collection "collection:0ffrNBBKmJjDLqUb9zJ2T2m8ix7H8HWljY1naGpwOCU")
   )
 (commit-tx)
 
 (begin-tx "Minting items on world-1")
-  (use marmalade-v2.ledger)
-  (use marmalade-v2.policy-manager)
-  (use marmalade-v2.collection-policy-v1)
+  (use marmalade.ledger)
+  (use marmalade.policy-manager)
+  (use marmalade.collection-policy-v1)
 
   (env-data
     {
@@ -207,11 +210,8 @@
       {
         'key: 'world-1,
         'caps: [
-          (marmalade-v2.ledger.MINT "t:AmkkzNd-EEJeh54X76BPfLh0Ld2ClvPqi7pNaQwxSLU" "k:world-1" 1.0)
-          (marmalade-v2.collection-policy-v1.MINT "t:AmkkzNd-EEJeh54X76BPfLh0Ld2ClvPqi7pNaQwxSLU")
-          
-          (marmalade-v2.ledger.MINT "t:IMyc-FLHyZMBfFegYkR5XI_rX2FPbafbeNYBHDUi1pQ" "k:world-1" 5.0)
-          (marmalade-v2.collection-policy-v1.MINT "t:IMyc-FLHyZMBfFegYkR5XI_rX2FPbafbeNYBHDUi1pQ")
+          (marmalade.ledger.MINT "t:AmkkzNd-EEJeh54X76BPfLh0Ld2ClvPqi7pNaQwxSLU" "k:world-1" 1.0),
+          (marmalade.ledger.MINT "t:IMyc-FLHyZMBfFegYkR5XI_rX2FPbafbeNYBHDUi1pQ" "k:world-1" 5.0)
         ]
       }
     ]
@@ -219,13 +219,11 @@
 
   (expect "Minting a single red party hat"
     true
-    (marmalade-v2.ledger.mint "t:AmkkzNd-EEJeh54X76BPfLh0Ld2ClvPqi7pNaQwxSLU" "k:world-1" (read-keyset "cp-mint-guard") 1.0)
+    (marmalade.ledger.mint "t:AmkkzNd-EEJeh54X76BPfLh0Ld2ClvPqi7pNaQwxSLU" "k:world-1" (read-keyset "cp-mint-guard") 1.0)
   )
 
   (expect "Minting an amount of 5 blue party hats"
     true
-    (marmalade-v2.ledger.mint "t:IMyc-FLHyZMBfFegYkR5XI_rX2FPbafbeNYBHDUi1pQ" "k:world-1" (read-keyset "cp-mint-guard") 5.0)
+    (marmalade.ledger.mint "t:IMyc-FLHyZMBfFegYkR5XI_rX2FPbafbeNYBHDUi1pQ" "k:world-1" (read-keyset "cp-mint-guard") 5.0)
   )
-
-  (get-tokens)
 (commit-tx)

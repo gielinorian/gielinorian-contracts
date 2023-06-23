@@ -3,7 +3,6 @@
 
   (implements kip.token-policy-v2)
   (use kip.token-policy-v2 [token-info])
-  (use kip.token-manifest [manifest])
   (use free.gielinorian-world [create-world-item get-item update-item-supply])
 
   ;;
@@ -23,7 +22,7 @@
     true
   )
   
-  (defcap ITEM_CREATED:bool (token-id:string manifest:object{manifest})
+  (defcap ITEM_CREATED:bool (token-id:string)
     @event
     true
   )
@@ -33,7 +32,7 @@
   ;;
 
   (defun enforce-ledger:bool ()
-    (enforce-guard (marmalade-v2.ledger.ledger-guard))
+    (enforce-guard (marmalade.ledger.ledger-guard))
   )
 
   ;;

@@ -219,19 +219,6 @@
       " Get details of ACCOUNT under ID. Fails if account does not exist."
   )
 
-  (defun rotate:bool
-    ( id:string
-      account:string
-      new-guard:guard )
-    @doc
-      " Rotate guard for ACCOUNT for ID to NEW-GUARD, validating against existing guard."
-    @model
-      [ (property (!= id ""))
-        (property (!= account ""))
-      ]
-
-  )
-
   (defun transfer:bool
     ( id:string
       sender:string
@@ -340,5 +327,4 @@
          \ Step 1 is offer with withdraw rollback after timeout. \
          \ Step 2 is buy, which completes using 'buyer' and 'buyer-guard' payload values."
   )
-
 )

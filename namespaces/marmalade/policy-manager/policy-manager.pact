@@ -6,7 +6,7 @@
     (enforce-guard 'marmalade-admin ))
 
   (implements kip.token-policy-v2)
-  (use kip.token-policy-v2 [token-policies token-info concrete-policy NON_FUNGIBLE_POLICY QUOTE_POLICY ROYALTY_POLICY COLLECTION_POLICY])
+  (use kip.token-policy-v2 [token-policies token-info concrete-policy NON_FUNGIBLE_POLICY QUOTE_POLICY ROYALTY_POLICY COLLECTION_POLICY GUARD_POLICY])
 
   (defschema concrete-policy-list
     policy-field:string
@@ -16,7 +16,7 @@
   (deftable concrete-policy-table:{concrete-policy-list})
 
   (defconst CONCRETE_POLICY_V1_LIST
-    [NON_FUNGIBLE_POLICY QUOTE_POLICY ROYALTY_POLICY COLLECTION_POLICY] )
+    [NON_FUNGIBLE_POLICY QUOTE_POLICY ROYALTY_POLICY COLLECTION_POLICY GUARD_POLICY] )
 
   ;; schema to save policy list in table
   (defschema policies-list
@@ -28,6 +28,7 @@
   (defschema ledger-guard-schema
     guard:guard
   )
+  
   (deftable ledger-guard-table:{ledger-guard-schema})
 
   (defun enforce-ledger:bool ()
@@ -142,6 +143,7 @@
     (let ((policies:object{token-policies}  (at 'policies token))
           (quote-policy:module{kip.token-policy-v2, marmalade.fungible-quote-policy-interface-v1} (get-concrete-policy QUOTE_POLICY)))
       (if (is-used policies QUOTE_POLICY)
+        ;; enforce-buy when quote policy is used
         (let* ((quote:object{marmalade.fungible-quote-policy-interface-v1.quote-schema} (quote-policy::get-quote sale-id))
                (spec:object{marmalade.fungible-quote-policy-interface-v1.quote-spec} (at 'spec quote))
                (fungible:module{fungible-v2} (at 'fungible spec))
@@ -149,14 +151,23 @@
                (sale-price:decimal (floor (* price amount) (fungible::precision)))
                (escrow-guard:guard (create-capability-guard (QUOTE_ESCROW sale-id )))
                (escrow-account:string (create-principal escrow-guard))
-               )
+               (bid-id:string (try "" (read-msg quote-policy::BID_ID-MSG-KEY)))
+              )
         (with-capability (QUOTE_ESCROW sale-id)
-          (fungible::transfer-create buyer escrow-account escrow-guard sale-price)
+          (if (= bid-id "")                        
+            (fungible::transfer-create buyer escrow-account escrow-guard sale-price)            
+            (quote-policy::accept-bid bid-id buyer sale-id escrow-account escrow-guard)
+          )
+          
           (map-buy token seller buyer buyer-guard amount sale-id
             (filter (!= quote-policy) (merge-policies-list policies)))
             (quote-policy::enforce-buy token seller buyer buyer-guard amount sale-id)
-          )) true)
-    ))
+          )) 
+          
+        ;; enforce-buy without the use of quote policy
+        (map-buy token seller buyer buyer-guard amount sale-id (merge-policies-list policies))
+      )        
+    ))    
 
     (defun get-escrow-account (sale-id:string)
       { 'account: (create-principal (create-capability-guard (QUOTE_ESCROW sale-id)))

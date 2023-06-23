@@ -21,13 +21,16 @@
 
   (defconst MARKETPLACE-FEE-MSG-KEY "marketplace-fee"
     @doc "Payload field for marketplace fee spec")
+  
+  (defconst BID_ID-MSG-KEY "bid-id"
+    @doc "Payload field for bid-id")
 
   (defschema quote-spec
     @doc "Quote data to include in payload"
     fungible:module{fungible-v2}
     price:decimal
-    recipient:string
-    recipient-guard:guard
+    amount:decimal
+    seller-guard:guard
   )
 
   (defschema marketplace-fee-spec
@@ -38,10 +41,20 @@
 
   (defschema quote-schema
     id:string
-    spec:object{quote-spec})
+    spec:object{quote-spec}    
+  )
 
   (defun get-quote:object{quote-schema} (sale-id:string)
     @doc "Get Quote information"
+  )
+
+  (defun accept-bid:bool (
+    bid-id:string 
+    buyer:string 
+    sale-id:string
+    escrow-account:string
+    escrow-guard:guard)
+    @doc "Aceept a bid and transfer the bid amount from the bid-escrow account"
   )
 
 )
