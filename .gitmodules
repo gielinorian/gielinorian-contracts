@@ -1,3 +1,6 @@
 [submodule "namespaces/kips"]
 	path = namespaces/kips
 	url = git@github.com:kadena-io/KIPs.git
+[submodule "namespaces/marmalade"]
+	path = namespaces/marmalade
+	url = git@github.com:kadena-io/marmalade.git
