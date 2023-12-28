@@ -1,0 +1,3 @@
+[submodule "namespaces/kips"]
+	path = namespaces/kips
+	url = git@github.com:kadena-io/KIPs.git
