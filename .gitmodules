@@ -4,3 +4,6 @@
 [submodule "namespaces/marmalade"]
 	path = namespaces/marmalade
 	url = git@github.com:kadena-io/marmalade.git
+[submodule "namespaces/marmalade-ng"]
+	path = namespaces/marmalade-ng
+	url = git@github.com:Marmalade-NG/marmalade-ng.git
