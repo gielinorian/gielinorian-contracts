@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  kadena-devnet:
+    container_name: kadena-devnet
+    image: kadena/devnet:latest
+    volumes:
+      - kadena_devnet:/data
+    ports:
+      - 8080:8080
+
+volumes:
+  kadena_devnet:
