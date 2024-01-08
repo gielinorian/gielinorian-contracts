@@ -1,0 +1,2 @@
+(print "Initializing module namespaces")
+(load "./namespaces/ns.repl")

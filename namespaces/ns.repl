@@ -1,0 +1,68 @@
+(enforce-pact-version "4.10")
+
+(begin-tx "Load the root contracts")
+    (print "Initialize kip-0005")
+    (load "./kips/kip-0005/fungible-v2.pact")
+
+    (print "Initialize coin contract")
+    (load "./root/fungible-xchain-v1.pact")
+    (load "./root/coin.pact")
+(commit-tx)
+
+(begin-tx "Load the free namespace")
+    (define-namespace 'free (sig-keyset) (sig-keyset))
+    (namespace 'free)
+
+    (print "Initialize pact-util-lib")
+    (load "./pact-util-lib/pact/contracts/util-chain-data.pact")
+    (load "./pact-util-lib/pact/contracts/util-fungible.pact")
+    (load "./pact-util-lib/pact/contracts/util-lists.pact")
+    (load "./pact-util-lib/pact/contracts/util-math.pact")
+    (load "./pact-util-lib/pact/contracts/util-strings.pact")
+    (load "./pact-util-lib/pact/contracts/util-random.pact")
+    (load "./pact-util-lib/pact/contracts/util-time.pact")
+    (load "./pact-util-lib/pact/contracts/util-zk.pact")
+(commit-tx)
+
+(begin-tx "Load the kip namespace")
+    (define-namespace 'kip (sig-keyset) (sig-keyset))
+    (namespace 'kip)
+
+    (print "Initialize marmalade kips")
+    (load "./marmalade-ng/pact/kip/ng-poly-fungible-v1.pact")
+(commit-tx)
+
+(begin-tx "Load the Marmalade-NG namespace")
+    (env-data
+        {
+            'admin_keyset: "marmalade-ng.admin",
+            'marmalade-admin: ["marmalade-admin"],
+            'lock-namespace: false
+        }
+    )
+
+    (env-sigs
+        [
+            {
+                'key:"marmalade-admin", 'caps:[]
+            }
+        ]
+    )
+
+    (define-namespace 'marmalade-ng (read-keyset "marmalade-admin") (read-keyset "marmalade-admin"))
+    (namespace 'marmalade-ng)
+
+    (define-keyset "marmalade-ng.admin" (read-keyset "marmalade-admin"))
+
+    (load "./marmalade-ng/pact/governance.pact")
+
+    (define-namespace 'marmalade-ng (create-user-guard (governance.namespace-user-guard)) (create-user-guard (governance.namespace-user-guard)))
+
+    (namespace 'marmalade-ng)
+    (load "./marmalade-ng/pact/policies/token-policy-ng-v1.pact")
+    (load "./marmalade-ng/pact/utils/util-policies.pact")
+    (load "./marmalade-ng/pact/ledger.pact")
+
+    (create-table ledger)
+    (create-table tokens)
+(commit-tx)
