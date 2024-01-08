@@ -1,0 +1,119 @@
+(enforce-pact-version "4.10")
+
+(begin-tx "Define namespaces")
+    (env-data
+        {
+            'ns-admin-keyset: ["ns-admin-keyset"],
+            'ns-operate-keyset: ["ns-operate-keyset"]
+        }
+    )
+
+    (env-sigs
+        [
+            {
+                'key: "ns-admin-keyset", 'caps: []
+            },
+            {
+                'key: "ns-operate-keyset", 'caps: []
+            }
+        ]
+    )
+
+    (env-exec-config ["DisablePact44"]); Makes it possible to define-keysets without a selected namespace
+    (load "./root/ns.pact")
+    (create-table registry)
+    (env-exec-config [])
+
+    (use ns)
+
+    (write-registry "kadena" (keyset-ref-guard "ns-operate-keyset") true)
+    (write-registry "free" GUARD_FAILURE true)
+    (write-registry "kip" GUARD_FAILURE true)
+    (write-registry "tools" GUARD_SUCCESS true)
+
+    (define-namespace "kadena" (keyset-ref-guard "ns-operate-keyset") (keyset-ref-guard "ns-operate-keyset"))
+    (define-namespace "free" GUARD_SUCCESS GUARD_FAILURE)
+    (define-namespace "kip" GUARD_SUCCESS GUARD_FAILURE)
+    (define-namespace "tools" GUARD_SUCCESS GUARD_SUCCESS)
+
+    ; Marmaled-NG testnet namespace
+    (write-registry "n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db" GUARD_FAILURE true)
+(commit-tx)
+
+(begin-tx "Load the root contracts")
+    (env-keys [])
+    (env-sigs [])
+
+    (print "Initialize kip-0005")
+    (load "./kips/kip-0005/fungible-v2.pact")
+
+    (print "Initialize coin contract")
+    (load "./root/gas-payer-v1.pact")
+    (load "./root/fungible-xchain-v1.pact")
+    (load "./root/coin.pact")
+
+    ; Create tables for the coin-v5 contract
+    (create-table coin-table)
+    (create-table allocation-table)
+
+    (print "Initialize marmalade-ng contracts")
+    (load "./marmalade-ng/pact/policies/token-policy-ng-v1.pact")
+
+(commit-tx)
+
+(begin-tx "Load the free namespace")
+    (namespace "free")
+
+    (print "Initialize pact-util-lib")
+    (load "./pact-util-lib/pact/contracts/util-chain-data.pact")
+    (load "./pact-util-lib/pact/contracts/util-fungible.pact")
+    (load "./pact-util-lib/pact/contracts/util-lists.pact")
+    (load "./pact-util-lib/pact/contracts/util-math.pact")
+    (load "./pact-util-lib/pact/contracts/util-strings.pact")
+    (load "./pact-util-lib/pact/contracts/util-random.pact")
+    (load "./pact-util-lib/pact/contracts/util-time.pact")
+    (load "./pact-util-lib/pact/contracts/util-zk.pact")
+(commit-tx)
+
+(begin-tx "Load the kip namespace")
+    (namespace "kip")
+    (load "./kips/kip-0012/account-protocols-v1.pact")
+
+    (print "Initialize marmalade kips")
+    (load "./marmalade-ng/pact/kip/ng-poly-fungible-v1.pact")
+(commit-tx)
+
+(begin-tx "Load the Marmalade-NG namespace")
+    (env-data
+        {
+            'admin_keyset: "n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db.admin",
+            'marmalade-admin: ["marmalade-admin"],
+            'lock-namespace: false
+        }
+    )
+
+    (env-sigs
+        [
+            {
+                'key:"marmalade-admin", 'caps:[]
+            }
+        ]
+    )
+
+    (load "./marmalade-ng/pact/governance.pact")
+    (define-namespace 'n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db (create-user-guard (governance.namespace-user-guard)) (create-user-guard (governance.namespace-user-guard)))
+
+    (namespace "n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db")
+    (define-keyset "n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db.admin" (read-keyset "marmalade-admin"))
+
+    ; Ledger
+    (load "./marmalade-ng/pact/ledger.pact")
+
+    (create-table ledger)
+    (create-table tokens)
+(commit-tx)
+
+(begin-tx "Load the tools namespace")
+    (namespace "tools")
+    (load "./tools/event-store.pact")
+(commit-tx)
