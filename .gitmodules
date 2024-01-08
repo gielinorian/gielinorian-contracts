@@ -7,3 +7,6 @@
 [submodule "namespaces/marmalade-ng"]
 	path = namespaces/marmalade-ng
 	url = git@github.com:Marmalade-NG/marmalade-ng.git
+[submodule "namespaces/pact-util-lib"]
+	path = namespaces/pact-util-lib
+	url = git@github.com:CryptoPascal31/pact-util-lib.git
