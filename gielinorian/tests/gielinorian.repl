@@ -24,4 +24,7 @@
     (namespace "gielinorian")
 
     (define-keyset "gielinorian.admin" (read-keyset "gielinorian-admin"))
+
+    (print "Loading world contract")
+    (load "./pact/world/world.pact")
 (commit-tx)
