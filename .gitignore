@@ -1,0 +1,7 @@
+# Idea
+.vscode
+.idea
+
+# Pact
+.pact-history
+/**/coverage/**/*
