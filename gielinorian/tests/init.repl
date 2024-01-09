@@ -1,2 +1,5 @@
 (print "Loading Gielinorian...")
 (load "../gielinorian.repl")
+
+(print "Start world tests...")
+(load "./world/create-world.repl")
