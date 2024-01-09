@@ -1,0 +1,46 @@
+(begin-tx "Testing the creation of a new world")
+    (use gielinorian.gielinorian-world)
+    (use marmalade-ng.ledger)
+
+    (env-data
+        {
+            'gielinorian-admin: ["gielinorian-admin"],
+            'gielinorian-world-1: {
+                'keys: ["gielinorian-world-1"],
+                'pred: "keys-all"
+            },
+            'world-1-token-uri: "https://www.gielinorian.com/worlds/1.json"
+        }
+    )
+
+    (env-sigs
+        [
+            {
+                'key:"gielinorian.admin", 'caps:[],
+                'key:"gielinorian-world-1", 'caps:[]
+            }
+        ]
+    )
+
+    (print (+ "World 1 token-id: " (create-token-id (read-keyset "gielinorian-world-1") (read-msg "world-1-token-uri"))))
+
+    (expect "World 1 token to be created"
+        (create-world (read-msg "world-1-token-uri") "k:gielinorian-world-1" (read-keyset "gielinorian-world-1") [])
+        true
+    )
+
+    (expect "World 1 token to be exist in the marmalade ledger"
+        (token-exist (create-token-id (read-keyset "gielinorian-world-1") (read-msg "world-1-token-uri")))
+        true
+    )
+
+    (expect "Supply of world 1 to be 1"
+        (total-supply (create-token-id (read-keyset "gielinorian-world-1") (read-msg "world-1-token-uri")))
+        1.0
+    )
+
+    (expect-failure "When minting a world that already exists"
+        "Failure: Database exception: Insert: row found for key t:_Zf_-4xLsIwjH-yPwuzZ_uuLnphlnhNGPhzt90dFC3w"
+        (create-world (read-msg "world-1-token-uri") "k:gielinorian-world-1" (read-keyset "gielinorian-world-1") [])
+    )
+(commit-tx)
