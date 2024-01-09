@@ -1,16 +1,36 @@
 (enforce-pact-version "4.10")
 
+(begin-tx "Define namespaces")
+    (use basic-guards)
+
+    (define-namespace 'util GUARD_SUCCESS GUARD_SUCCESS)
+    (define-namespace 'free GUARD_SUCCESS GUARD_SUCCESS)
+    (define-namespace 'kip GUARD_SUCCESS GUARD_SUCCESS)
+    (define-namespace 'gielinorian GUARD_SUCCESS GUARD_SUCCESS)
+(commit-tx)
+
 (begin-tx "Load the root contracts")
+    (env-keys [])
+    (env-sigs [])
+
     (print "Initialize kip-0005")
     (load "./kips/kip-0005/fungible-v2.pact")
 
     (print "Initialize coin contract")
+    (load "./root/gas-payer-v1.pact")
     (load "./root/fungible-xchain-v1.pact")
     (load "./root/coin.pact")
+
+    ; Create tables for the coin-v5 contract
+    (create-table coin-table)
+    (create-table allocation-table)
+
+    (print "Initialize marmalade-ng contracts")
+    (load "./marmalade-ng/pact/policies/token-policy-ng-v1.pact")
+
 (commit-tx)
 
 (begin-tx "Load the free namespace")
-    (define-namespace 'free (sig-keyset) (sig-keyset))
     (namespace 'free)
 
     (print "Initialize pact-util-lib")
@@ -25,8 +45,8 @@
 (commit-tx)
 
 (begin-tx "Load the kip namespace")
-    (define-namespace 'kip (sig-keyset) (sig-keyset))
     (namespace 'kip)
+    (load "./kips/kip-0012/account-protocols-v1.pact")
 
     (print "Initialize marmalade kips")
     (load "./marmalade-ng/pact/kip/ng-poly-fungible-v1.pact")

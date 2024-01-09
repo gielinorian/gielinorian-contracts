@@ -1,0 +1,2 @@
+(print "Loading Gielinorian...")
+(load "../gielinorian.repl")

@@ -1,0 +1,31 @@
+(begin-tx "Load environment")
+    (load "../namespaces/root/basic-guards.pact")
+(commit-tx)
+
+(print "Initializing module namespaces")
+(load "../namespaces/ns.repl")
+
+(begin-tx "Initializing game namespace")
+    (env-data
+        {
+            'gielinorian-admin: {
+                'keys: ["gielinorian-admin"],
+                'pred: "keys-all"
+            },
+            'ns: "gielinorian"
+        }
+    )
+
+    (env-sigs
+        [
+            {
+                'key:"gielinorian-admin", 'caps:[]
+            }
+        ]
+    )
+
+    (define-namespace 'gielinorian (read-keyset "gielinorian-admin") (read-keyset "gielinorian-admin"))
+    (namespace 'gielinorian)
+
+    (define-keyset "gielinorian.admin" (read-keyset "gielinorian-admin"))
+(commit-tx)
