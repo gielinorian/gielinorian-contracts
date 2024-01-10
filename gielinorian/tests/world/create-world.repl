@@ -43,4 +43,6 @@
         "Failure: Database exception: Insert: row found for key t:_Zf_-4xLsIwjH-yPwuzZ_uuLnphlnhNGPhzt90dFC3w"
         (create-world (read-msg "world-1-token-uri") "k:gielinorian-world-1" (read-keyset "gielinorian-world-1") [])
     )
+
+    ; @todo check for created world event
 (commit-tx)
