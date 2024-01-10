@@ -21,6 +21,13 @@
     )
   )
 
+  ; Events
+
+  (defcap WORLD_CREATED (world-id:string)
+    @event
+    true
+  )
+
   ; Functions
 
   (defun create-world:bool (token-uri:string account:string guard:guard policies:[module{token-policy-ng-v1}])
@@ -31,6 +38,7 @@
         )
         (marmalade-ng.ledger.create-token world-token-id 0 token-uri [] guard)
         (marmalade-ng.ledger.mint world-token-id account guard 1.0)
+        (emit-event (WORLD_CREATED world-token-id))
       )
     ;)
   )
