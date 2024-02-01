@@ -57,7 +57,9 @@
         {
             'admin_keyset: "marmalade-ng.admin",
             'marmalade-admin: ["marmalade-admin"],
-            'lock-namespace: false
+            'marmalade-extra-policy: ["marmalade-extra-policy"],
+            'lock-namespace: false,
+            'extra_policies_admin_keyset: "marmalade-extra-policy"
         }
     )
 
@@ -79,10 +81,69 @@
     (define-namespace 'marmalade-ng (create-user-guard (governance.namespace-user-guard)) (create-user-guard (governance.namespace-user-guard)))
 
     (namespace 'marmalade-ng)
-    (load "./marmalade-ng/pact/policies/token-policy-ng-v1.pact")
-    (load "./marmalade-ng/pact/utils/util-policies.pact")
+    ; Ledger
     (load "./marmalade-ng/pact/ledger.pact")
-
     (create-table ledger)
     (create-table tokens)
+
+    ; Policy Util
+    (load "./marmalade-ng/pact/utils/util-policies.pact")
+
+    ; Policies
+    (load "./marmalade-ng/pact/policies/policy-adjustable-royalty.pact")
+    (create-table royalty-tokens)
+    (create-table royalty-sales)
+
+
+    (load "./marmalade-ng/pact/policies/policy-auction-sale.pact")
+    (create-table auctions)
+
+    (load "./marmalade-ng/pact/policies/policy-blacklist.pact")
+    (create-table blacklist)
+    (create-table tokens-blacklist)
+
+    (load "./marmalade-ng/pact/policies/policy-collection.pact")
+    (create-table collections)
+    (create-table tokens)
+
+    (load "./marmalade-ng/pact/policies/policy-disable-burn.pact")
+    (load "./marmalade-ng/pact/policies/policy-disable-sale.pact")
+    (load "./marmalade-ng/pact/policies/policy-disable-transfer.pact")
+
+    (load "./marmalade-ng/pact/policies/policy-dutch-auction-sale.pact")
+    (create-table quotes)
+
+    (load "./marmalade-ng/pact/policies/policy-extra-policies.pact")
+    (create-table global)
+    (create-table tokens)
+    (create-table sales)
+
+    (load "./marmalade-ng/pact/policies/policy-fixed-issuance.pact")
+    (create-table supplies)
+
+    (load "./marmalade-ng/pact/policies/policy-fixed-sale.pact")
+    (create-table quotes)
+
+    (load "./marmalade-ng/pact/policies/policy-guards.pact")
+    (create-table guards)
+
+    (load "./marmalade-ng/pact/policies/policy-instant-mint.pact")
+    (create-table instant-mint)
+
+    (load "./marmalade-ng/pact/policies/policy-marketplace.pact")
+    (create-table marketplace-sales)
+
+    (load "./marmalade-ng/pact/policies/policy-non-fungible.pact")
+
+    (load "./marmalade-ng/pact/policies/policy-royalty.pact")
+    (create-table royalty-tokens)
+
+    (load "./marmalade-ng/pact/policies/policy-trusted-custody.pact")
+    (create-table tokens-custody)
+    (create-table accounts-custody)
+
+    (load "./marmalade-ng/pact/policies/token-policy-ng-v1.pact")
+
+    ; Utils
+    (load "./marmalade-ng/pact/utils/std-policies.pact")
 (commit-tx)
