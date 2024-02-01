@@ -1,2 +1,7 @@
 (print "Loading Gielinorian...")
 (load "../gielinorian.repl")
+
+(print "Loading general tests...")
+(load "./tools/event-store.repl")
+
+(print "Loading Gielinorian tests...")
