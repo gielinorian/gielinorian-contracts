@@ -6,6 +6,7 @@
     (define-namespace 'util GUARD_SUCCESS GUARD_SUCCESS)
     (define-namespace 'free GUARD_SUCCESS GUARD_SUCCESS)
     (define-namespace 'kip GUARD_SUCCESS GUARD_SUCCESS)
+    (define-namespace 'tools GUARD_SUCCESS GUARD_SUCCESS)
     (define-namespace 'gielinorian GUARD_SUCCESS GUARD_SUCCESS)
 (commit-tx)
 
@@ -146,4 +147,9 @@
 
     ; Utils
     (load "./marmalade-ng/pact/utils/std-policies.pact")
+(commit-tx)
+
+(begin-tx "Load the tools namespace")
+    (namespace 'tools)
+    (load "./tools/event-store.pact")
 (commit-tx)
