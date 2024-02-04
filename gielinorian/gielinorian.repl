@@ -1,7 +1,3 @@
-(begin-tx "Load environment")
-    (load "../namespaces/root/basic-guards.pact")
-(commit-tx)
-
 (print "Initializing module namespaces")
 (load "../namespaces/ns.repl")
 
