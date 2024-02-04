@@ -35,6 +35,9 @@
     (define-namespace "free" GUARD_SUCCESS GUARD_FAILURE)
     (define-namespace "kip" GUARD_SUCCESS GUARD_FAILURE)
     (define-namespace "tools" GUARD_SUCCESS GUARD_SUCCESS)
+
+    ; Marmaled-NG testnet namespace
+    (write-registry "n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db" GUARD_FAILURE true)
 (commit-tx)
 
 (begin-tx "Load the root contracts")
@@ -59,7 +62,7 @@
 (commit-tx)
 
 (begin-tx "Load the free namespace")
-    (namespace 'free)
+    (namespace "free")
 
     (print "Initialize pact-util-lib")
     (load "./pact-util-lib/pact/contracts/util-chain-data.pact")
@@ -73,7 +76,7 @@
 (commit-tx)
 
 (begin-tx "Load the kip namespace")
-    (namespace 'kip)
+    (namespace "kip")
     (load "./kips/kip-0012/account-protocols-v1.pact")
 
     (print "Initialize marmalade kips")
@@ -83,7 +86,7 @@
 (begin-tx "Load the Marmalade-NG namespace")
     (env-data
         {
-            'admin_keyset: "marmalade-ng.admin",
+            'admin_keyset: "n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db.admin",
             'marmalade-admin: ["marmalade-admin"],
             'marmalade-extra-policy: ["marmalade-extra-policy"],
             'lock-namespace: false,
@@ -99,16 +102,12 @@
         ]
     )
 
-    (define-namespace 'marmalade-ng (read-keyset "marmalade-admin") (read-keyset "marmalade-admin"))
-    (namespace 'marmalade-ng)
-
-    (define-keyset "marmalade-ng.admin" (read-keyset "marmalade-admin"))
-
     (load "./marmalade-ng/pact/governance.pact")
+    (define-namespace 'n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db (create-user-guard (governance.namespace-user-guard)) (create-user-guard (governance.namespace-user-guard)))
 
-    (define-namespace 'marmalade-ng (create-user-guard (governance.namespace-user-guard)) (create-user-guard (governance.namespace-user-guard)))
+    (namespace "n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db")
+    (define-keyset "n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db.admin" (read-keyset "marmalade-admin"))
 
-    (namespace 'marmalade-ng)
     ; Ledger
     (load "./marmalade-ng/pact/ledger.pact")
     (create-table ledger)
@@ -177,6 +176,6 @@
 (commit-tx)
 
 (begin-tx "Load the tools namespace")
-    (namespace 'tools)
+    (namespace "tools")
     (load "./tools/event-store.pact")
 (commit-tx)
