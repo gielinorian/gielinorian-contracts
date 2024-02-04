@@ -38,6 +38,9 @@
 
     ; Marmaled-NG testnet namespace
     (write-registry "n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db" GUARD_FAILURE true)
+
+    ; Gielinorian namespace
+    (write-registry "n_1fd1c7ca32908354e1f8face9d522f2b41bbd242" GUARD_SUCCESS true)
 (commit-tx)
 
 (begin-tx "Load the root contracts")
