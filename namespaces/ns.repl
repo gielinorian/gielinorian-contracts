@@ -1,13 +1,40 @@
 (enforce-pact-version "4.10")
 
 (begin-tx "Define namespaces")
-    (use basic-guards)
+    (env-data
+        {
+            'ns-admin-keyset: ["ns-admin-keyset"],
+            'ns-operate-keyset: ["ns-operate-keyset"]
+        }
+    )
 
-    (define-namespace 'util GUARD_SUCCESS GUARD_SUCCESS)
-    (define-namespace 'free GUARD_SUCCESS GUARD_SUCCESS)
-    (define-namespace 'kip GUARD_SUCCESS GUARD_SUCCESS)
-    (define-namespace 'tools GUARD_SUCCESS GUARD_SUCCESS)
-    (define-namespace 'gielinorian GUARD_SUCCESS GUARD_SUCCESS)
+    (env-sigs
+        [
+            {
+                'key: "ns-admin-keyset", 'caps: []
+            },
+            {
+                'key: "ns-operate-keyset", 'caps: []
+            }
+        ]
+    )
+
+    (env-exec-config ["DisablePact44"]); Makes it possible to define-keysets without a selected namespace
+    (load "./root/ns.pact")
+    (create-table registry)
+    (env-exec-config [])
+
+    (use ns)
+
+    (write-registry "kadena" (keyset-ref-guard "ns-operate-keyset") true)
+    (write-registry "free" GUARD_FAILURE true)
+    (write-registry "kip" GUARD_FAILURE true)
+    (write-registry "tools" GUARD_SUCCESS true)
+
+    (define-namespace "kadena" (keyset-ref-guard "ns-operate-keyset") (keyset-ref-guard "ns-operate-keyset"))
+    (define-namespace "free" GUARD_SUCCESS GUARD_FAILURE)
+    (define-namespace "kip" GUARD_SUCCESS GUARD_FAILURE)
+    (define-namespace "tools" GUARD_SUCCESS GUARD_SUCCESS)
 (commit-tx)
 
 (begin-tx "Load the root contracts")
