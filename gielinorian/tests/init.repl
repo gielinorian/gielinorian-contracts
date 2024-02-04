@@ -1,5 +1,8 @@
 (print "Loading Gielinorian...")
 (load "../gielinorian.repl")
 
-(print "Start world tests...")
+(print "Loading general tests...")
+(load "./tools/event-store.repl")
+
+(print "Loading Gielinorian tests...")
 (load "./world/create-world.repl")

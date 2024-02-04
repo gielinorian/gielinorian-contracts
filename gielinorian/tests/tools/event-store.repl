@@ -1,0 +1,47 @@
+(begin-tx "Test event store tool")
+    (use tools.event-store)
+
+    
+    (env-chain-data 
+        {
+            "block-height": 1
+        }
+    )
+
+    (expect "Empty event to be stored" (append (env-events true)) [])
+
+    (expect "Test Event to be fired" (fire) true)
+
+    (expect "Test event has to be stored" (append (env-events true)) [
+        {
+            "height": 1,
+            "module-hash": "b-L12hZY6QCGoEN9r-o8QgKOFDlJ13Ct2bVbWG8jLrA",
+            "name": "tools.event-store.TEST_EVENT",
+            "params": []
+        }
+    ])
+
+    (expect "Unfired transfer event from coin to not exist in the store" 
+        (event-exist 
+            {
+                "height": 8,
+                "module-hash": "rE7DU8jlQL9x_MPYuniZJf5ICBTAEHAIFQCB4blofP4",
+                "name": "coin.TRANSFER",
+                "params": ["k:sender", "k:receiver", 1.0]
+            }
+        )
+        false
+    )
+
+    (expect "Existence of the fired test event" 
+        (event-exist 
+            {
+                "height": 1,
+                "module-hash": "b-L12hZY6QCGoEN9r-o8QgKOFDlJ13Ct2bVbWG8jLrA",
+                "name": "tools.event-store.TEST_EVENT",
+                "params": []
+            }
+        )
+        true
+    )
+(rollback-tx)
