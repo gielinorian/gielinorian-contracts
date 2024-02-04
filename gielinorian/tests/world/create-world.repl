@@ -1,6 +1,7 @@
 (begin-tx "Testing the creation of a new world")
     (use n_1fd1c7ca32908354e1f8face9d522f2b41bbd242.gielinorian-world)
     (use n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db.ledger)
+    (use tools.event-store)
 
     (env-data
         {
@@ -20,6 +21,12 @@
                 'key:"gielinorian-world-1", 'caps:[]
             }
         ]
+    )
+
+    (env-chain-data 
+        {
+            "block-height": 1
+        }
     )
 
     (expect "World 1 token to be created"
@@ -42,5 +49,17 @@
         (create-world (read-msg "world-1-token-uri") "k:gielinorian-world-1" (read-keyset "gielinorian-world-1") [])
     )
 
-    ; @todo check for created world event
+    (append (env-events true))
+
+    (expect "Existence of the fired WORLD_CREATED event" 
+        (event-exist 
+            {
+                "height": 1,
+                "module-hash": "cYV9kw7-j1DEioYWg299C7BoIA28vAPMOSvDDEVMccI",
+                "name": "n_1fd1c7ca32908354e1f8face9d522f2b41bbd242.gielinorian-world.WORLD_CREATED",
+                "params": ["t:_Zf_-4xLsIwjH-yPwuzZ_uuLnphlnhNGPhzt90dFC3w"]
+            }
+        )
+        true
+    )
 (commit-tx)
