@@ -2,7 +2,7 @@
 PACT="${PACT_PATH:-pact}"
 
 # Find all .repl files in the current directory
-REPL_SCRIPTS=$(find . ! -name "gielinorian.repl" -name "*.repl")
+REPL_SCRIPTS=$(find ./gielinorian/tests ! -name "gielinorian.repl" -name "*.repl")
 
 for repl in $REPL_SCRIPTS
   do echo "============================================================"
