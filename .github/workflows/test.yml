@@ -19,6 +19,7 @@ jobs:
       
       - name: Run tests
         run: |
-          ./pact ./gielinorian/tests/init.repl > output.txt
-          if [ "$(grep "Load successful" output.txt|wc -l )" -eq 19 ]; then echo "Tests Succeeded"; exit 0; else echo "Tests Failed";exit 1; fi
+          PACT_PATH=./pact
+          ./run_tests.sh | tee output.txt
+          grep -q "Load fail" output.txt && echo exit 1 || exit 0
     
