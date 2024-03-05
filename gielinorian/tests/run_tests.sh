@@ -8,7 +8,7 @@ if ! command -v $PACT &> /dev/null; then
 fi
 
 # Find all .repl files in the current directory
-REPL_SCRIPTS=$(find ./gielinorian/tests ! -name "gielinorian.repl" -name "*.repl")
+REPL_SCRIPTS=$(find ./gielinorian/tests ! -name "gielinorian.repl" ! -name "*-init.repl" -name "*.repl")
 
 for repl in $REPL_SCRIPTS
   do echo "============================================================"

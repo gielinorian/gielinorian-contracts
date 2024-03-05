@@ -1,0 +1,5 @@
+(begin-tx)
+    (namespace "n_1fd1c7ca32908354e1f8face9d522f2b41bbd242")
+    (load "../../pact/world/world.pact")
+    (create-table worlds)
+(commit-tx)
