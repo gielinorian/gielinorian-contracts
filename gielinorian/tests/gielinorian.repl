@@ -1,5 +1,5 @@
 (print "Initializing module namespaces")
-(load "../namespaces/ns.repl")
+(load "../../namespaces/ns.repl")
 
 (begin-tx "Initializing game namespace")
     (env-data

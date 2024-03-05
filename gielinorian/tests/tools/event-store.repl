@@ -1,3 +1,5 @@
+(load "../gielinorian.repl")
+
 (begin-tx "Test event store tool")
     (use tools.event-store)
 
