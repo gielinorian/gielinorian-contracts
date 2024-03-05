@@ -1,0 +1,40 @@
+name: Test Gielinorian Contracts
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      PACT_VERSION: 4.10.0
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Cache Pact
+        uses: actions/cache@v4
+        with:
+          path: ~/pact
+          key: pact-v${{ env.PACT_VERSION }}
+
+      - name: Install Pact
+        run: |
+          if [ ! -f ~/pact/pact ]; then
+            wget -nv https://github.com/kadena-io/pact/releases/download/v${{ env.PACT_VERSION }}/pact-${{ env.PACT_VERSION }}-linux-22.04.zip -O pact.zip
+            unzip pact.zip -d ~/pact
+            chmod +x ~/pact/pact
+          fi
+
+      - name: Run tests
+        run: |
+          export PACT_PATH=~/pact/pact
+          ./gielinorian/tests/run_tests.sh | tee output.txt
+          if grep -q "Load fail" output.txt; then
+            echo "Load failure detected, failing the build."
+            exit 1
+          else
+            echo "Load successful, proceeding."
+          fi
