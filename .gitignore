@@ -1,2 +1,7 @@
+# Idea
+.idea
+.vscode
+
+# Pact
 .pact-history
 /**/coverage/**/*
