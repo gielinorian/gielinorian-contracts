@@ -7,19 +7,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: 'recursive'
+
+      - name: Cache Pact
+        uses: actions/cache@v3
+        with:
+          path: ~/pact
+          key: pact-v${{ PACT_VERSION }}
 
       - name: Install Pact
         run: |
-          wget -nv https://github.com/kadena-io/pact/releases/download/v4.10.0/pact-4.10.0-linux-22.04.zip
-          unzip pact-4.10.0-linux-22.04.zip pact
-          chmod +x pact
-      
+          if [ ! -f ~/pact/pact ]; then
+            wget -nv https://github.com/kadena-io/pact/releases/download/v${{ PACT_VERSION }}/pact-${{ PACT_VERSION }}-linux-22.04.zip -O pact.zip
+            unzip pact.zip -d ~/pact
+            chmod +x ~/pact/pact
+          fi
+
       - name: Run tests
         run: |
-          PACT_PATH=./pact
+          export PACT_PATH=~/pact/pact
           ./gielinorian/tests/run_tests.sh | tee output.txt
-          grep -q "Load fail" output.txt && echo exit 1 || exit 0
-    
+          if grep -q "Load fail" output.txt; then
+            echo "Load failure detected, failing the build."
+            exit 1
+          else
+            echo "Load successful, proceeding."
+          fi
