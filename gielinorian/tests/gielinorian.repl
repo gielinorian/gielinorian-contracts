@@ -26,8 +26,4 @@
     (namespace "n_1fd1c7ca32908354e1f8face9d522f2b41bbd242")
 
     (define-keyset "n_1fd1c7ca32908354e1f8face9d522f2b41bbd242.gielinorian-admin" (read-keyset "gielinorian-admin"))
-    
-    (print "Loading world contracts")
-    (load "./pact/world/world.pact")
-    (create-table worlds)
 (commit-tx)
