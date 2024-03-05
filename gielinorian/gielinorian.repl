@@ -21,7 +21,7 @@
     )
 
     (define-namespace 'gielinorian (read-keyset "gielinorian-admin") (read-keyset "gielinorian-admin"))
-    (namespace 'gielinorian)
+    (namespace "gielinorian")
 
     (define-keyset "gielinorian.admin" (read-keyset "gielinorian-admin"))
 (commit-tx)
