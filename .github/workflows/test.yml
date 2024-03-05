@@ -5,6 +5,8 @@ on: push
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PACT_VERSION: ${{ vars.PACT_VERSION }}
 
     steps:
       - name: Checkout repository
@@ -16,12 +18,12 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/pact
-          key: pact-v${{ PACT_VERSION }}
+          key: pact-v${{ env.PACT_VERSION }}
 
       - name: Install Pact
         run: |
           if [ ! -f ~/pact/pact ]; then
-            wget -nv https://github.com/kadena-io/pact/releases/download/v${{ PACT_VERSION }}/pact-${{ PACT_VERSION }}-linux-22.04.zip -O pact.zip
+            wget -nv https://github.com/kadena-io/pact/releases/download/v${{ env.PACT_VERSION }}/pact-${{ env.PACT_VERSION }}-linux-22.04.zip -O pact.zip
             unzip pact.zip -d ~/pact
             chmod +x ~/pact/pact
           fi
