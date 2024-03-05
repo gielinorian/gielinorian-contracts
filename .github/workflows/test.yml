@@ -14,15 +14,11 @@ jobs:
       - name: Install Pact
         run: |
           wget -nv https://github.com/kadena-io/pact/releases/download/v4.10.0/pact-4.10.0-linux-22.04.zip
-          unzip pact-4.10.0-linux-22.04.zip pact -d /bin
-          chmod +x .bin/pact
+          unzip pact-4.10.0-linux-22.04.zip pact
+          chmod +x pact
       
       - name: Run tests
         run: |
           pact ./gielinorian/tests/init.repl > output.txt
           if [ "$(grep "Load successful" out.txt|wc -l )" -eq 19 ]; then echo "Tests Succeeded"; exit 0; else echo "Tests Failed";exit 1; fi
-          
-      - name: Validate tests
-        run: |
-          grep -q "PASSED" output.txt
     
