@@ -1,14 +1,16 @@
 (print "Initializing module namespaces")
 (load "../../namespaces/ns.repl")
 
-(begin-tx "Initializing game namespace")
+(begin-tx "Initializing Gielinorian namespace")
+    (use ns)
+
     (env-data
         {
-            'gielinorian-admin: {
+            "gielinorian-admin": {
                 'keys: ["gielinorian-admin"],
                 'pred: "keys-all"
             },
-            'ns: "gielinorian"
+            'ns: "n_1fd1c7ca32908354e1f8face9d522f2b41bbd242"
         }
     )
 
@@ -20,12 +22,12 @@
         ]
     )
 
-    (define-namespace "gielinorian" (read-keyset "gielinorian-admin") (read-keyset "gielinorian-admin"))
-    (namespace "gielinorian")
+    (define-namespace "n_1fd1c7ca32908354e1f8face9d522f2b41bbd242" (read-keyset "gielinorian-admin") (read-keyset "gielinorian-admin"))
+    (namespace "n_1fd1c7ca32908354e1f8face9d522f2b41bbd242")
 
-    (define-keyset "gielinorian.admin" (read-keyset "gielinorian-admin"))
-(commit-tx)
-
-(begin-tx "Loading world contracts")
+    (define-keyset "n_1fd1c7ca32908354e1f8face9d522f2b41bbd242.gielinorian-admin" (read-keyset "gielinorian-admin"))
+    
+    (print "Loading world contracts")
     (load "./pact/world/world.pact")
+    (create-table worlds)
 (commit-tx)

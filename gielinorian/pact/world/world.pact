@@ -1,5 +1,5 @@
 (namespace (read-string "ns"))
-(enforce-keyset (read-keyset (+ (read-string "ns") ".gielinorian-admin")))
+(enforce-keyset (read-keyset "gielinorian-admin"))
 (module gielinorian-world GOVERNANCE
   (use kip.ng-poly-fungible-v1 [account-details])
   (use n_442d3e11cfe0d39859878e5b1520cd8b8c36e5db.ledger [create-token-id create-token mint details account-guard])
