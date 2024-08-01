@@ -12,7 +12,7 @@ REPL_SCRIPTS=$(find ./gielinorian/tests ! -name "gielinorian.repl" ! -name "*-in
 
 for repl in $REPL_SCRIPTS
   do echo "============================================================"
-     echo "Running $(grep -oP "[^/]*$" <<< $repl)"
+     echo "Running $(basename "$repl")"
      echo "============================================================"
      ${PACT} $repl 2>&1
      echo ""
