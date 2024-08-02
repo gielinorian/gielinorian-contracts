@@ -44,10 +44,8 @@
     (env-keys [])
     (env-sigs [])
 
-    (print "Initialize kip-0005")
     (load "./kips/kip-0005/fungible-v2.pact")
 
-    (print "Initialize coin contract")
     (load "./root/gas-payer-v1.pact")
     (load "./root/fungible-xchain-v1.pact")
     (load "./root/coin.pact")
@@ -56,7 +54,6 @@
     (create-table coin-table)
     (create-table allocation-table)
 
-    (print "Initialize marmalade-ng contracts")
     (load "./marmalade-ng/pact/policies/token-policy-ng-v1.pact")
 
 (commit-tx)
@@ -64,7 +61,6 @@
 (begin-tx "Load the free namespace")
     (namespace "free")
 
-    (print "Initialize pact-util-lib")
     (load "./pact-util-lib/pact/contracts/util-chain-data.pact")
     (load "./pact-util-lib/pact/contracts/util-fungible.pact")
     (load "./pact-util-lib/pact/contracts/util-lists.pact")
@@ -79,7 +75,6 @@
     (namespace "kip")
     (load "./kips/kip-0012/account-protocols-v1.pact")
 
-    (print "Initialize marmalade kips")
     (load "./marmalade-ng/pact/kip/ng-poly-fungible-v1.pact")
 (commit-tx)
 

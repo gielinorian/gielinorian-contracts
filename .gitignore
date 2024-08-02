@@ -4,4 +4,8 @@
 
 # Pact
 .pact-history
+.pc-history
 /**/coverage/**/*
+
+# Test
+*.log
