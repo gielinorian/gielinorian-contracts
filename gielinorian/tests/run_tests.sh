@@ -2,7 +2,7 @@
 PACT="${PACT_PATH:-pact}"
 
 # Check if pact is installed
-if ! command -v $PACT &> /dev/null; then
+if ! $PACT -v; then
     echo "Error: Pact is not installed."
     exit 1
 fi

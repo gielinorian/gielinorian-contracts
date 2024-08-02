@@ -33,7 +33,7 @@
         })
     )
 
-    (defun append:[object{event}] (event-list:list{event})
+    (defun append:[object{event}] (event-list:list)
         (map  
             (lambda (event)
                 (let*

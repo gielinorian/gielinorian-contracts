@@ -10,21 +10,25 @@
         }
     )
 
-    (expect "Empty event to be stored" (append (env-events true)) [])
+    (expect "Empty event to be stored" [] (append (env-events true)))
 
-    (expect "Test Event to be fired" (fire) true)
+    (expect "Test Event to be fired" true (fire))
 
-    (expect "Test event has to be stored" (append (env-events true)) [
-        {
-            "height": 1,
-            "module-hash": "b-L12hZY6QCGoEN9r-o8QgKOFDlJ13Ct2bVbWG8jLrA",
-            "name": "tools.event-store.TEST_EVENT",
-            "params": []
-        }
-    ])
+    (expect "Test event has to be stored"
+        [
+            {
+                "height": 1,
+                "module-hash": (if (= (pact-version) "5.0") "IMqsT2jv2YW9mj6xOYD-4yIrlYiuM12mNn-9dnBmqCk" "lQq8GFM6ncECKOe1pfL_BxFX7vzF6xArOlMSqaKbEBU"),
+                "name": "tools.event-store.TEST_EVENT",
+                "params": []
+            }
+        ]
+        (append (env-events true))
+    )
 
-    (expect "Unfired transfer event from coin to not exist in the store" 
-        (event-exist 
+    (expect "Unfired transfer event from coin to not exist in the store"
+        false
+        (event-exist
             {
                 "height": 8,
                 "module-hash": "rE7DU8jlQL9x_MPYuniZJf5ICBTAEHAIFQCB4blofP4",
@@ -32,18 +36,17 @@
                 "params": ["k:sender", "k:receiver", 1.0]
             }
         )
-        false
     )
 
-    (expect "Existence of the fired test event" 
+    (expect "Existence of the fired test event"
+        true
         (event-exist 
             {
                 "height": 1,
-                "module-hash": "b-L12hZY6QCGoEN9r-o8QgKOFDlJ13Ct2bVbWG8jLrA",
+                "module-hash": (if (= (pact-version) "5.0") "IMqsT2jv2YW9mj6xOYD-4yIrlYiuM12mNn-9dnBmqCk" "lQq8GFM6ncECKOe1pfL_BxFX7vzF6xArOlMSqaKbEBU"),
                 "name": "tools.event-store.TEST_EVENT",
                 "params": []
             }
         )
-        true
     )
 (rollback-tx)

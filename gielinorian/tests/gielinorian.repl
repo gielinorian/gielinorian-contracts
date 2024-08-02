@@ -1,4 +1,3 @@
-(print "Initializing module namespaces")
 (load "../../namespaces/ns.repl")
 
 (begin-tx "Initializing game namespace")
