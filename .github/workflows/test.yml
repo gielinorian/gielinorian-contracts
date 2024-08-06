@@ -6,37 +6,7 @@ jobs:
   test-pact-v4:
     runs-on: ubuntu-latest
     env:
-      PACT_VERSION: 4.12.0
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
-      - name: Cache Pact
-        uses: actions/cache@v4
-        with:
-          path: ~/pact
-          key: pact-v${{ env.PACT_VERSION }}
-
-      - name: Install Pact
-        run: |
-          if [ ! -f ~/pact/pact ]; then
-            wget -nv https://github.com/kadena-io/pact/releases/download/v${{ env.PACT_VERSION }}/pact-${{ env.PACT_VERSION }}-linux-22.04.zip -O pact.zip
-            unzip pact.zip -d ~/pact
-            chmod +x ~/pact/pact
-          fi
-
-      - name: Run tests
-        run: |
-          export PACT_PATH=~/pact/pact
-          ./tests/run_off_chain.sh
-
-  test-pact-v5:
-    runs-on: ubuntu-latest
-    env:
-      PACT_VERSION: 5.0.0
+      PACT_VERSION: v4.12.0
 
     steps:
       - name: Checkout repository
@@ -50,7 +20,37 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Pull Pact-core image
+      - name: Pull Pact-core ${{ env.PACT_VERSION }} image
+        run: docker pull gielinorian/pact-core:${{ env.PACT_VERSION }}
+
+      - name: Run tests
+        run: |
+          docker run -v $(pwd):/data gielinorian/pact-core:${{ env.PACT_VERSION }} ./tests/run_off_chain.sh
+
+      - name: Validate Tests
+        run: |
+          if grep -q "FAILURE" ./out/test_output.log; then
+            exit 1
+          fi
+
+  test-pact-v5:
+    runs-on: ubuntu-latest
+    env:
+      PACT_VERSION: v5.0.0-beta
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Pull Pact-core ${{ env.PACT_VERSION }} image
         run: docker pull gielinorian/pact-core:${{ env.PACT_VERSION }}
 
       - name: Run tests
